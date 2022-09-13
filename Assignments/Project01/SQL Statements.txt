@@ -1,0 +1,14 @@
+CREATE TABLE cities ( id INT, latitude FLOAT, longitude FLOAT, name VARCHAR(64), abbreviation VARCHAR(4), territory VARCHAR(64), PRIMARY KEY (id));
+
+/* Data obtained from: https://cs.msutexas.edu/~griffin/data/ */
+COPY cities(id, latitude, longitude, name, abbreviation, territory) FROM 'C:\databases\data\filtered_cities.csv' DELIMITER ',' CSV HEADER;
+
+/*
+https://gis.stackexchange.com/questions/145007/creating-geometry-from-lat-lon-in-table-using-postgis
+*/
+ALTER TABLE cities ADD COLUMN geom geometry(Point, 4326);
+UPDATE cities SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);
+
+/* Dropping original latitude and longitude columns is possible but optional now */
+ALTER TABLE cities DROP COLUMN longitude;
+ALTER TABLE cities DROP COLUMN latitude;
