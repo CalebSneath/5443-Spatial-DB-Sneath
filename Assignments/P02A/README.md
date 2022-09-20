@@ -10,10 +10,11 @@ A collection of database backups, query commands, and screenshots to show the re
 
 |   #   | File            | Description                                        |
 | :---: | --------------- | -------------------------------------------------- |
-|   1   | [Query List.SQL](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P02A/Query_List.SQL)         | Contains the queries to view several of the rows and every column, with geometry set to display as a more human readable format.   |
-|   2   | [airports SQL.txt](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P02A/airports_SQL.txt)         | Additional queries used instead of the shp2pgsql command for the airports .csv file. |
+|   1   | [Query List.SQL](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/blob/main/Assignments/P02A/Query%20List.sql)         | Contains the queries to view several of the rows and every column, with geometry set to display as a more human readable format.   |
+|   2   | [airports SQL.txt](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P02A/airports%20SQL.txt)         | Additional queries used instead of the shp2pgsql command for the airports .csv file. |
 |   3   | [Various .SQL files]  | Recreates the final resulting table.  |
 |   4   | [Various .PNG files]  | Screenshots showing the ran queries.  |
+|   5   | [Various .7Z files]  | Various compressed .SQL files.  |
 
 ### Instructions
 
