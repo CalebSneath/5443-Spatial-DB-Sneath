@@ -1,0 +1,14 @@
+CREATE TABLE airports (id INT,name TEXT,city TEXT,country TEXT,code3 TEXT,code4 TEXT,lat FLOAT,lon FLOAT,elevation FLOAT,gmt TEXT,tz_short TEXT, timezone TEXT, location_type TEXT, airport_type TEXT,  PRIMARY KEY (id));
+
+COPY airports(id, name, city, country, code3, code4, lat, lon, elevation, gmt, tz_short, timezone, location_type, airport_type)
+	FROM 'C:\databases\data\P02A\airports.csv' DELIMITER ',' CSV HEADER;
+
+ALTER TABLE airports ADD COLUMN geom geometry(Point, 4326);
+UPDATE airports SET geom = ST_SetSRID(ST_MakePoint(lon, lat), 4326);
+
+ALTER TABLE airports DROP COLUMN lon;
+ALTER TABLE airports DROP COLUMN lat;
+
+CREATE INDEX geom_index
+ ON airports 
+ USING gist(geom);
