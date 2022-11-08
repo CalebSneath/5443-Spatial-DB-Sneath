@@ -42,15 +42,15 @@ A collection of database backups, query commands, and screenshots to show the re
 ### Overview
 In order for a reasonable simulation to be run, bases need to be modeled, and flight paths for the missiles need to be generated. The region is loaded from a json object sent by the attacker which also contains the assigned arsenal.
 <br>
-<img src="Trajectories.jpeg" width="720">
+<img src="Trajectories.jpg" width="720">
 <br>
 With two missile points and timestamps, a linear trajectory can be extrapolated. Aside from their relative position to each other, the starting times are rather meaningless. Up to a certain timestamp later which can be configured in the source code, the linear flight path of incoming missiles from radar sweeps can be predicted and placed into a temporary table by looking at the difference in X, Y, and Z components of the two points and then dividing by the difference in time. Note that this only works if the missiles do indeed follow linear motion.
 <br>
-<img src="Intersections.jpeg" width="720">
+<img src="Intersections.jpg" width="720">
 <br>
 A query is run to select the closest point to a missile battery, which is above the ground, and which has a distance no greater than the currently considered missile can reach for that timestamp of the extrapolated path. If it is, we know that the missile can in fact reach it then, so that will be the final destination of the missile. This can further be used to solve for the launch time.
 <br>
-<img src="Final_Visualization.jpeg" width="720">
+<img src="Final_Visualization.jpg" width="720">
 <br>
 
 ### Known Issues
