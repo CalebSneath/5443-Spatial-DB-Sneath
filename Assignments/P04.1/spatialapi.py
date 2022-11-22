@@ -387,7 +387,8 @@ def loadRegion():
                     INSERT INTO fleet SELECT 
                                     ship_id, category, shipclass, displacement, ship_length, ship_width, torpedolaunchers,
                                     armament, armor, speed, turn_radius,
-                                    ST_Translate(ST_Rotate(ship_geom, 2 * Pi() * rand_num), new_x, new_y)::geometry(Point, 4326),
+                                    ST_Translate(ST_Rotate(ship_geom, 2 * Pi() * rand_num, ST_SetSRID(ST_MakePoint(0,0), 4326)
+                                    ), new_x, new_y)::geometry(Point, 4326),
                                     bearing 
                                     FROM fleet_template;
                     UPDATE fleet SET bearing = rand_num;
