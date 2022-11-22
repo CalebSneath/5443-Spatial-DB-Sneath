@@ -1,8 +1,8 @@
-# P04.1 - Battle Ship (Part 1) - A battleship simulation using spatial databases.
+## P04.1 - Battle Ship (Part 1) A battleship simulation using spatial databases.
 ## Caleb Sneath
 #### November 22, 2022
 
-# Description: 
+## Description: 
 A fastAPI and psycopg2 based api for the simulation of battleships. This project is simply the first step, to read in
 a JSON file of various assigned battleships and stats, read in the map, randomly place the battleships reasonably within
 the map, and then export the positions as another JSON. In the future, more parts will be added.
@@ -18,12 +18,13 @@ This repository contains a collection of database backups, an api, documentation
 |   2   | [module/__init__.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/module/__init__.py)         | Contains any module import information. |
 |   2   | [module/timeconversion.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/module/timeconversion.py)         | Contains general commands related to time conversions. |
 |   3   | [Various .jpeg files]  | Screenshots to show end data visualization.  |
-|   4   | [bbox.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/bbox.json) | Contains an example copy of the bounding box.  |
-|   5   | [.config.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/.config.json) | Contains information to allow the api to interact with the server as well as form network connections.  |
-|   6   | [ships.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/ships.json) | Contains an example copy of the input fleet information.  |
-|   8   | [backups/fleet.sql] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/fleet.sql) | Database backup of bbox table. |
-|   9   | [backups/jsontest.sql] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/fleet_template.sql) | Database backup of bbox table. |
-|   10  | [bbox.sql] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/bbox.sql) | Database backup of bbox table. |
+|   4   | [bbox.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/bbox.json) | Contains an example copy of the bounding box.  |
+|   5   | [.config.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/.config.json) | Contains information to allow the api to interact with the server as well as form network connections.  |
+|   6   | [ships.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/ships.json) | Contains an example copy of the input fleet information.  |
+|   7   | [jsontest.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/jsontest.json) | Contains an example copy of the output fleet information.  |
+|   8   | [backups/fleet.sql](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/fleet.sql) | Database backup of bbox table. |
+|   9   | [backups/jsontest.sql](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/fleet_template.sql) | Database backup of bbox table. |
+|   10  | [bbox.sql](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.1/bbox.sql) | Database backup of bbox table. |
 
 ### Local Instructions:
  Building: Requires Python (Tested for 3.9.5), FastAPI, and psycopg2. To install the last two, simply run in the terminal:
