@@ -1,0 +1,13 @@
+{
+    "dbname": "P04A",
+    "user": "Example",
+    "password": "Example",
+    "dbhost": "localhost",
+    "host": "localhost",
+    "port": "5432",
+    "sitename": "spatialapi:app",
+    "publicport": 8081,
+    "teamname": "Rocketscience",
+    "simulationmode": "defender",
+    "schema": "public"
+}
