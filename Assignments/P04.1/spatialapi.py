@@ -360,6 +360,7 @@ def loadRegion():
 
 
                     DO $$
+                    DECLARE rand_num float := random();
                     DECLARE count INTEGER := 1;
                     DECLARE new_x FLOAT := 0;
                     DECLARE new_y FLOAT := 0;
@@ -386,9 +387,10 @@ def loadRegion():
                     INSERT INTO fleet SELECT 
                                     ship_id, category, shipclass, displacement, ship_length, ship_width, torpedolaunchers,
                                     armament, armor, speed, turn_radius,
-                                    ST_Translate(ST_Rotate(ship_geom, 2 * Pi() * random()), new_x, new_y)::geometry(Point, 4326),
+                                    ST_Translate(ST_Rotate(ship_geom, 2 * Pi() * rand_num), new_x, new_y)::geometry(Point, 4326),
                                     bearing 
                                     FROM fleet_template;
+                    UPDATE fleet SET bearing = rand_num;
                     END$$;
                 """
             cur.execute(sql)
