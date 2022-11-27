@@ -30,9 +30,9 @@ This repository contains a collection of database backups, an api, documentation
 |   2   | [module/__init__.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/module/__init__.py)         | Contains any module import information. |
 |   2   | [module/timeconversion.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/module/timeconversion.py)         | Contains general commands related to time conversions. |
 |   3   | [Various .jpeg files]  | Screenshots to show end data visualization.  |
-|   4   | [bbox.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/bbox.json) | Contains an example copy of the bounding box.  |
-|   5   | [.config.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/.config.json) | Contains information to allow the api to interact with the server as well as form network connections.  |
-|   6   | [ships.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/ships.json) | Contains an example copy of the input fleet information.  |
+|   4   | [bbox.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/bbox.json) | Contains an example copy of the bounding box.  |
+|   5   | [.config.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/.config.json) | Contains information to allow the api to interact with the server as well as form network connections.  |
+|   6   | [ships.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/ships.json) | Contains an example copy of the input fleet information.  |
 |   8   | [Various SQL Files] | Assorted database backups. |
 
 ### Local Instructions:
