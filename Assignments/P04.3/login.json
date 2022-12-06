@@ -1,0 +1,12 @@
+{
+    "success": true,
+    "message": "'config' contains the necessary information to log into the rabbitMQ message router.",
+    "config": {
+      "exchange": "battleship",
+      "port": "8080",
+      "host": "battleshipgame.fun",
+      "user": "rocketscience",
+      "password": "CtBElrwOBgOH",
+      "hash": "24121985393028864311722805236604570116"
+    }
+  }

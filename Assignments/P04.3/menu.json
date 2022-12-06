@@ -1,0 +1,203 @@
+[
+    {
+        "item": "Create Game",
+        "description": "Attempts to create a game of the specified name.",
+        "params": {
+            "game_name": "string"
+        },
+        "route": "createGame",
+        "examples": [
+            {
+                "command": "test1",
+                "explanation": "see description "
+            }
+        ],
+        "returns": "Either an error message, or the game id and details."
+    },
+    {
+        "item": "Current Games",
+        "description": "Views all games available to join.",
+        "params": {
+        },
+        "route": "currentGames",
+        "examples": [
+            {
+                "command": "",
+                "explanation": "see description "
+            }
+        ],
+        "returns": "Either an error message, or the game ids and details."
+    },
+    {
+        "item": "Join Game",
+        "description": "Chooses selected game number to attempt to join.",
+        "params": {
+            "game_id": "int"
+        },
+        "route": "setGame",
+        "examples": [
+            {
+                "command": "5",
+                "explanation": "see description "
+            }
+        ],
+        "returns": "Either an error message, or the game ids and details."
+    },
+    {
+        "item": "Start",
+        "description": "Contacts the main game server to generate a random fleet and sector. Then places the fleet randomly in the sector. Finally, places you on the player queue to allow your fleet to take a turn.",
+        "params": {
+        },
+        "route": "initializeSimulation",
+        "examples": [
+            {
+                "command": "",
+                "explanation": "see description "
+            }
+        ],
+        "returns": "Either an error message, or a copy of the fleet details."
+    },
+    {
+        "item": "Fleet Status",
+        "description": "Gets information regarding fleet.",
+        "params": {
+        },
+        "route": "exportFleetPositionJSON",
+        "examples": [
+            {
+                "command": "",
+                "explanation": "See description."
+            }
+        ],
+        "returns": "Either prints a summary of each ship or an error message."
+    },
+    {
+        "item": "Fleet Speed",
+        "description": "Sets the speed for a fleet of ships.",
+        "params": {
+            "targetFleetNumber": "int",
+            "speed": "float"
+        },
+        "route": "moveFleet",
+        "examples": [
+            {
+                "command": "0/20",
+                "explanation": "Set the speed of all ships in the fleet 0 to 20m per time unit"
+            }
+        ],
+        "returns": "Either a success or an error message."
+    },
+    {
+        "item": "Move Fleet",
+        "description": "Moves fleet of ships specified distance and naturally sets their speed to the same.",
+        "params": {
+            "targetFleetNumber": "int",
+            "distance": "float"
+        },
+        "route": "moveFleet",
+        "examples": [
+            {
+                "command": "0/20",
+                "explanation": "Moves and sets the speed of all ships in the fleet 0 to 20m per time unit"
+            }
+        ],
+        "returns": "Either a success or an error message."
+    },
+    {
+        "item": "Move Ship",
+        "description": "Creates a new fleet out of one or more ships and moves it the specified distance, also changing the speed.",
+        "params": {
+            "targetFleetNumber": "list[int]",
+            "ship_id": "list[float]"
+        },
+        "route": "moveShip",
+        "examples": [
+            {
+                "command": "0/20",
+                "explanation": "Moves and sets the speed of ship 0 to 20m per time unit, creating a new fleet with one ship."
+            },
+            {
+                "command": "[0,1,2,3]/[20,20,15,20]",
+                "explanation": "Moves ships 0-3 forward by 20 or 15m, creating four new fleets with one ship each."
+            }
+        ],
+        "returns": "Either a success or an error message."
+    },
+    {
+        "item": "Turn Fleet",
+        "description": "Starts turning the fleet the specified number of degrees.",
+        "params": {
+            "fleet_id": "int",
+            "angleDelta": "float"
+        },
+        "route": "rotateFleet",
+        "examples": [
+            {
+                "command": "0/20",
+                "explanation": "Turn all ships in fleet 0 to the right by 20 degrees."
+            }
+        ],
+        "returns": "Either a success or an error message."
+    },
+    {
+        "item": "Turn Ship",
+        "description": "Turns one or more ships the specified number of degrees, creating a new fleet of one ship each.",
+        "params": {
+            "ship_id": "list[int]",
+            "angleDelta": "list[float]"
+        },
+        "route": "rotateShip",
+        "examples": [
+            {
+                "command": "0/20",
+                "explanation": "Rotates ship 0 right by 20 degrees, creating a new fleet with one ship."
+            },
+            {
+                "command": "[0,1,2,3]/[20,20,15,20]",
+                "explanation": "Rotates ships 0-3 right by 20 or 15 degrees, creating four new fleets with one ship each."
+            }
+        ],
+        "returns": "Either a success or an error message."
+    },
+    {
+        "item": "Move Guns",
+        "description": "Starts turning a ship's guns toward a particular bearing and elevation. The bearing is in relation to the ship.",
+        "params": {
+            "ship_id": "list[int]",
+            "bearingDelta": "list[float]",
+            "elevationDelta": "list[float]"
+        },
+        "route": "rotateGuns",
+        "examples": [
+            {
+                "command": "0/20/15",
+                "explanation": "Turn ship 0's guns 20 degrees clockwise and 15 degrees up."
+            },
+            {
+                "command": "[0,1,2,3]/[20,20,15,20]/[20,20,15,20]",
+                "explanation": "Rotates ships 0-3s' guns clockwise by 20 or 15 degrees, and up the same."
+            }
+        ],
+        "returns": "Either a success or error message."
+    },
+    {
+        "item": "Fire Guns",
+        "description": "Fires one or more ships guns at current bearing and elevation. The bearing is in relation to the ship.",
+        "params": {
+            "ship_id": "list[int]",
+            "gun_id": "list[int]"
+        },
+        "route": "fireGunNowShip",
+        "examples": [
+            {
+                "command": "0/0",
+                "explanation": "Fire ship 0's gun 0."
+            },
+            {
+                "command": "[0,1,2,3]/[0,1,[0,1],0]",
+                "explanation": "Fire gun 0 for ship 0, gun 1 for ship 1, guns 0 and 1 for ship 2, and gun 0 for ship 3."
+            }
+        ],
+        "returns": "Either a success or error message."
+    }
+]
