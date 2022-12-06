@@ -1,11 +1,9 @@
-# P04.2 - Battle Ship (Part 2) - A battleship simulation using spatial databases.
+# P04.3 - Battle Ship (Part 3) - A Menu and Comms.
 ## Caleb Sneath
-#### November 22, 2022
+#### December 5, 2022
 
 # Description: 
-A fastAPI and psycopg2 based api for the simulation of battleships. This project is the second step, to read in
-a JSON file of various assigned battleships and stats, read in the map, randomly place the battleships reasonably within
-the map, and then export the positions as another JSON. Afterwards, some example queries are available. 
+A fastAPI and psycopg2 based api for the simulation of battleships. This project is the third step, to create a way to broadcast and receive common messages, as well as to create a terminal based men for handling all clientside interaction with the game. 
 <br>
 
 ### Example queries:
@@ -17,7 +15,7 @@ the map, and then export the positions as another JSON. Afterwards, some example
 - A query to create a rectangular polygon given the position, length, width, and bearing for each ship in the database. Has two alternatives. One calculates the rectangular with the point corresponding to the bottom left corner of the rectangle, and an alternative which instead has the pont correspond to the center of the rectangle.
 
 <br>
-In the future, more parts will be added.
+This is the final part for now, although it could serve as a good basis for expansion.
 The most notable technique here is the use of a "template" fleet. This allows for simple transformations such as 
 movements and rotations of fleets by using the position and rotation normalized template fleet table.
 This repository contains a collection of database backups, an api, documentation of query commands, and screenshots to show the results of loading spatial data from files, randomly determining positions, exporting the data, and visualizing that data. 
@@ -26,19 +24,27 @@ This repository contains a collection of database backups, an api, documentation
 
 |   #   | File            | Description                                        |
 | :---: | --------------- | -------------------------------------------------- |
-|   1   | [spatialapi.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/spatialapi.py)         | Contains the main program file.  |
-|   2   | [module/__init__.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/module/__init__.py)         | Contains any module import information. |
-|   2   | [module/timeconversion.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/module/timeconversion.py)         | Contains general commands related to time conversions. |
+|   1   | [spatialapi.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/spatialapi.py)         | Contains the main program file.  |
+|   2   | [module/__init__.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/module/__init__.py)         | Contains any module import information. |
+|   2   | [module/timeconversion.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/module/timeconversion.py)         | Contains general commands related to time conversions. |
 |   3   | [Various .jpeg files]  | Screenshots to show end data visualization.  |
-|   4   | [bbox.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/bbox.json) | Contains an example copy of the bounding box.  |
-|   5   | [.config.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/.config.json) | Contains information to allow the api to interact with the server as well as form network connections.  |
-|   6   | [ships.json] (https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.2/ships.json) | Contains an example copy of the input fleet information.  |
-|   8   | [Various SQL Files] | Assorted database backups. |
+|   4   | [bbox.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/bbox.json) | Contains an example copy of the bounding box.  |
+|   5   | [.config.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/.config.json) | Contains information to allow the api to interact with the server as well as form network connections.  |
+|   6   | [ships.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/ships.json) | Contains an example copy of the input fleet information.  |
+|   7   | [Various SQL Files] | Assorted database backups. |
+|   8   | [menu.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/menu.py) | Contains a Python file to run a menu to control the clientside part of the code.  |
+|   9   | [comms.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/comms.py) | Contains a Python file with much of the code for base classes to send and receive messages.  |
+|   10  | [listener.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/listener.py) | Contains a Python file to run a channel to intercept game related messages.  |
+|   11  | [sender.py](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/sender.py) | Contains a Python file to implement a method to send messages on the game's comms channgels.  |
+|   12  | [login.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/login.json) | Contains a JSON file with the clientside authentification credentials obtained from the game server.  |
+|   13  | [tempRegion.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/tempRegion.json) | Contains a JSON file with the purpose of temporarily storing/logging game region info.  |
+|   14  | [tempFleet.json](https://github.com/CalebSneath/5443-Spatial-DB-Sneath/tree/main/Assignments/P04.3/tempFleet.json) | Contains a JSON file with the purpose of temporarily storing/logging game fleet info.  |
 
 ### Local Instructions:
  Building: Requires Python (Tested for 3.9.5), FastAPI, and psycopg2. To install the last two, simply run in the terminal:
 - pip install fastapi
 - pip install psycopg2
+- pip install pika
  Afterward, set up your basic with pgAdmin and fill out the .config.json file. Adjust the line below to your install path if necessary for the confPath variable. 
  - Include the desired copy of ships.json and bbox.json for the input files in the local directory.
  - Run this file in the terminal with spatialapi.py and it should work.
@@ -56,9 +62,11 @@ This repository contains a collection of database backups, an api, documentation
  - Add whatever attacker's you need by typing into your address bar "http://{address}/addAttackerIP/{target address}" where {target address} follows a similar pattern as address, just for the attacker. Repeat this for any attackers.
  - (Optional) To permanently save an attacker ip so this does not need to be done again, in your address bar run "http://{address}/persistCurrentIPs"
  - To load up a new round of the simulation, run in your browser: "http://{address}/initializeSimulation". This will return the new ship positions.
+ - To start the client menu and listener, edit the login.json file, as well as any "creds" string in spatialapi.py, listener.py and sender.py with the appropriate credentials.
+ - Launch spatialapi.py, then launch in separate terminals menu.py and listener.py
 
 ### Overview
-In order for a reasonable simulation to begin future projects, common methods of communication between servers needs to be established. This project furthers this goal by establishing common inputs and outputs to read fleets. It also helps initialize ship placement for the future.
+This section of the project implements a firing command for ships that is broadcast, as well as a listener to intercept such messages. On top of that, a basic terminal menu was implemented to control the client side controls for managing fleets and ships.
 <br>
 <img src="Fleet.jpg" width="720">
 <br>
@@ -70,6 +78,8 @@ This screenshot shows a QGIS visualization of a random placement of ships in the
 
 
 # Credits
+### Menu code mostly obtained from:
+### https://github.com/rugbyprof/5443-Spatial-DB/tree/main/Assignments/P04.3
 ### Example data obtained from: 
 ### https://github.com/rugbyprof/5443-Spatial-DB/tree/main/Assignments/P04.1
 <br>
