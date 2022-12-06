@@ -38,10 +38,11 @@ Returns:            String containing a time code in the format of
                             "hour:minute:second" without quotes
 """
 def convertTimeFromSecondsNoDate(inTime):
-    hourMark = int(inTime) / 3600
-    tempTime = float(inTime) - (hourMark * 3600)
+    tempTime = int(inTime) % (3600 * 24)
+    hourMark = int(tempTime / 3600)
+    tempTime = int(tempTime) - (hourMark * 3600)
     minuteMark = int(tempTime / 60)
-    tempTime = float (tempTime) - minuteMark * 60
+    tempTime = int (tempTime) - minuteMark * 60
     return str(hourMark) + ":" + str(minuteMark) + ":" + str(tempTime)
 
 """
@@ -99,9 +100,6 @@ def convertDateToOtherDate(inTime):
     # Example return time: “27/10/22 12:12:07”
     tempString = str(inTime)
     rawString = str(tempString.replace(" ", "-")).split("-")
-    print(rawString)
     year = str(rawString[0][2::])
     return (rawString[2] + '/' + rawString[1] + '/' + year + ' ' + rawString[3])
     
-
-print(convertTimeFromSeconds("1555555555"))
