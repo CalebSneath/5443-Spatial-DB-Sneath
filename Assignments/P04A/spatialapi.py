@@ -169,7 +169,7 @@ teamname = None
 # Strategy configuration variables
 # Determines if missiles that are targetting another region will be
 # intercepted by defender.
-altruist = False
+altruist = True
 # Determines whether missiles should be shot later when closest, or 
 # as early as possible. Safety margin defines
 # how many seconds to leave as a buffer if not shooting earliest.
@@ -193,7 +193,9 @@ simCatRadiusConversionGeom = 100
 # 2 prints some successes to console
 simulationDebugLevel = 2
 
-confPath = "/home/P04A/P04A/.config.json"
+confDirectory = "/home/P04A/P04A/"
+confPath = ".config.json"
+confPath = confDirectory + confPath
 
 
 class DatabaseCursor(object):
@@ -262,6 +264,279 @@ async def docs_redirect():
 #                          API Specific Routes
 ##############################################################################
 
+@app.get("/getRegionBoundingBorder")
+def getRegionBoundingBorder():
+    """
+    getRegionBoundingBorder
+    Returns a JSON including the current region's bounding box.
+    Returns bounding box as a linestring.
+    Ex. 
+     http://localhost:8081/getRegionBoundingBorder
+    """
+    try:
+        with DatabaseCursor(confPath) as cur:
+            # Check if at least one missile remains.
+            sql = \
+            f"""
+                SELECT ST_ExteriorRing(ST_Envelope(boundary))::jsonb 
+                    FROM assigned_regions LIMIT 1;
+            """
+
+            cur.execute(sql)
+            return cur.fetchone()
+
+    except:
+        if(simulationDebugLevel > 1):
+            print ("Host database configuration error or invalid region.")
+        return "Host database configuration error or invalid region."
+        
+@app.get("/getRegionBoundingPolygon")
+def getRegionBoundingPolygon():
+    """
+    getRegionBoundingPolygon
+    Returns a JSON including the current region's bounding box.
+    Returns bounding box as a polygon.
+    Ex. 
+     http://localhost:8081/getRegionBoundingPolygon
+    """
+    try:
+        with DatabaseCursor(confPath) as cur:
+            # Check if at least one missile remains.
+            sql = \
+            f"""
+                SELECT ST_Envelope(boundary)::jsonb 
+                    FROM assigned_regions LIMIT 1;
+            """
+
+            cur.execute(sql)
+            return cur.fetchone()
+
+    except:
+        if(simulationDebugLevel > 1):
+            print ("Host database configuration error or invalid region.")
+        return "Host database configuration error or invalid region."
+
+@app.get("/getRegionArea")
+def getRegionArea():
+    """
+    getRegionArea
+    Returns the region's area (in meters).
+    Ex. 
+     http://localhost:8081/getRegionArea
+    """
+    try:
+        with DatabaseCursor(confPath) as cur:
+            # Check if at least one missile remains.
+            sql = \
+            f"""
+                SELECT ST_Area(boundary::geography) 
+                    FROM assigned_regions LIMIT 1;
+            """
+
+            cur.execute(sql)
+            return cur.fetchone()
+
+    except:
+        if(simulationDebugLevel > 1):
+            print ("Host database configuration error or invalid region.")
+        return "Host database configuration error or invalid region."
+
+@app.get("/getRegionCentroid")
+def getRegionBoundingCentroid():
+    """
+    getRegionCentroid
+    Returns the region's area (in meters).
+    Ex. 
+     http://localhost:8081/getRegionCentroid
+    """
+    try:
+        with DatabaseCursor(confPath) as cur:
+            # Check if at least one missile remains.
+            sql = \
+            f"""
+                SELECT ST_Centroid(boundary)::jsonb 
+                    FROM assigned_regions LIMIT 1;
+            """
+
+            cur.execute(sql)
+            return cur.fetchone()
+
+    except:
+        if(simulationDebugLevel > 1):
+            print ("Host database configuration error or invalid region.")
+        return "Host database configuration error or invalid region."
+
+@app.get("/createFiveBatteries")
+def createFiveBatteries():
+    """
+    createFiveBatteries
+    Creates a battery on the centroid of the 
+    region. Then creates a batter directly to
+    the four cardinal directions of the centroid.
+
+    Note: Generates exactly on the
+    border, but probably won't work if the bounding
+    box is too large, and may have undefined 
+    behavior if two points of the geometry border
+    intersect a line going straight
+    from the center of the region for unusual
+    shaped regions.
+
+    Ex. 
+     http://localhost:8081/createFiveBatteries
+    """
+    try:
+        with DatabaseCursor(confPath) as cur:
+            # Check if at least one missile remains.
+            sql = \
+            f"""
+                /* Center Battery */
+                INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-1, 'Battery',
+                        ST_SetSRID(ST_MakePoint(ST_X(ST_Centroid((SELECT boundary from assigned_regions LIMIT 1))), ST_Y(ST_Centroid((SELECT boundary from assigned_regions LIMIT 1))), 0), 4326));
+
+                /* North Border Battery */
+                INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-2, 'Battery',
+                        ST_SetSRID(ST_MakePoint(
+							ST_X(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+												ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)), 
+												90
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 
+							ST_Y(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+												ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)), 
+												90
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 0), 4326));
+
+                /* South Border Battery */
+                INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-3, 'Battery',
+                        ST_SetSRID(ST_MakePoint(
+							ST_X(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+												ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)), 
+												-90
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 
+							ST_Y(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+												ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)), 
+												-90
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 0), 4326));
+
+                /* East Border Battery */
+                INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-4, 'Battery',
+                        ST_SetSRID(ST_MakePoint(
+							ST_X(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+                                                ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)) + 180, 
+                                                ST_Y((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1))
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 
+							ST_Y(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+                                                ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)) + 180, 
+                                                ST_Y((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1))
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 0), 4326));
+
+                /* West Border Battery */
+                INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-5, 'Battery',
+                        ST_SetSRID(ST_MakePoint(
+							ST_X(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+                                                ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)) - 180, 
+                                                ST_Y((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1))
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 
+							ST_Y(
+								(SELECT ST_Centroid(ST_Intersection
+									(
+										ST_Boundary(boundary), 
+										ST_MakeLine
+										(
+											(SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1), 
+											ST_SetSRID(ST_MakePoint
+											(
+                                                ST_X((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1)) - 180, 
+                                                ST_Y((SELECT ST_Centroid(boundary) FROM assigned_regions LIMIT 1))
+											), 4326)
+										)
+									))::Geometry(Point, 4326)
+									FROM assigned_regions LIMIT 1)), 0), 4326));
+            """
+
+            cur.execute(sql)
+
+    except:
+        if(simulationDebugLevel > 1):
+            print ("Host database configuration error or invalid region.")
+        return "Host database configuration error or invalid region."
 
 @app.get("/attackerClockRequest")
 def attackerClockRequest():
@@ -442,7 +717,7 @@ def radar_sweep():
                             # Interpolate points in advance one second at a time.
                             sql = \
                                 f"""
-                                    DROP TABLE trajectory_prediction;
+                                    DROP TABLE IF EXISTS trajectory_prediction;
                                     CREATE TABLE trajectory_prediction (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
                                     DO $$
                                         DECLARE count INTEGER := 1;
@@ -474,11 +749,16 @@ def radar_sweep():
                             intersectsCharge = 1
                             sql = \
                                 f"""
-                                    SELECT count(ST_Intersects(ST_Buffer(points_of_interest.point_geometry, {str(metersToDegreesNA(simCatRadiusConversion))} * (SELECT radius_category FROM missile_spec_key WHERE missile_spec_key.classification_label = '{str(radarTuple['features'][inIndex]['properties']['missile_type'])}')), trajectory_prediction.intersects))
+                                    SELECT count(points_of_interest.point_geometry)
                                         FROM 
                                             points_of_interest, trajectory_prediction
                                         WHERE
-                                            point_category != 'Battery';
+                                            point_category != 'Battery' AND
+                                            ST_Intersects(ST_Buffer(points_of_interest.point_geometry, 
+                                                {str(metersToDegreesNA(simCatRadiusConversion))} * 
+                                                (SELECT radius_category FROM missile_spec_key WHERE missile_spec_key.classification_label = 
+                                                '{str(radarTuple['features'][inIndex]['properties']['missile_type'])}')), 
+                                                trajectory_prediction.intersects);
                                 """
                             cur.execute(sql)
 
@@ -519,7 +799,9 @@ def radar_sweep():
                                     f"""
                                         SELECT ST_X(trajectory_prediction.intersects), ST_Y(trajectory_prediction.intersects),ST_Z(trajectory_prediction.intersects), 
                                             trajectory_prediction.time_code - (ST_3DDistance(
-                                                (SELECT point_geometry FROM points_of_interest WHERE point_category = 'Battery' ORDER BY ST_3DDistance(point_geometry, trajectory_prediction.intersects) ASC LIMIT 1), trajectory_prediction.intersects) /  {str(interceptSpeed)}),
+                                                (SELECT point_geometry FROM points_of_interest WHERE point_category = 'Battery' 
+                                                    ORDER BY ST_3DDistance(point_geometry, trajectory_prediction.intersects) ASC LIMIT 1), 
+                                                trajectory_prediction.intersects) /  {str(interceptSpeed)}),
 											trajectory_prediction.time_code, trajectory_prediction.missile_id
                                         FROM trajectory_prediction 
 										WHERE 
@@ -529,8 +811,9 @@ def radar_sweep():
                                             /* Ensure missile wouldn't have passed by this time. */
                                             (trajectory_prediction.time_code - {str(simulationTime)} - {str(shootBuffer)}) >= 
                                             (ST_3DDistance(
-                                                (SELECT point_geometry FROM points_of_interest WHERE point_category = 'Battery' ORDER BY ST_3DDistance(point_geometry, trajectory_prediction.intersects) ASC LIMIT 1), 
-                                                    trajectory_prediction.intersects) 
+                                                (SELECT point_geometry FROM points_of_interest WHERE point_category = 'Battery' 
+                                                    ORDER BY ST_3DDistance(point_geometry, trajectory_prediction.intersects) ASC LIMIT 1), 
+                                                trajectory_prediction.intersects) 
                                                 / {str(interceptSpeed)})
                                         ORDER BY time_code {shootOrder} LIMIT 1;
                                     """
@@ -547,7 +830,10 @@ def radar_sweep():
                                             WHERE 
                                                 /* Ensure missile is above ground */
                                                 points_of_interest.point_category = 'Battery'
-                                                ORDER BY ST_3DDistance(points_of_interest.point_geometry, ST_SetSRID(ST_MakePoint({str(missileCoordinate[0])}, {str(missileCoordinate[1])}, {str(missileCoordinate[2])}), 4326)) ASC LIMIT 1;
+                                                ORDER BY ST_3DDistance(points_of_interest.point_geometry, 
+                                                    ST_SetSRID(ST_MakePoint({str(missileCoordinate[0])}, 
+                                                        {str(missileCoordinate[1])}, 
+                                                        {str(missileCoordinate[2])}), 4326)) ASC LIMIT 1;
                                         """
                                     cur.execute(sql)
                                     interceptBaseCoordinate = cur.fetchone()
@@ -567,9 +853,9 @@ def radar_sweep():
                                     "team_id": int(teamID), 
                                     "target_missile_id": int(missileCoordinate[5]),
                                     "missile_type": str(interceptionMissileTypes[interIndex][0]),
-                                    "firedfrom_lon": float(interceptBaseCoordinate[0]),
-                                    "firedfrom_lat": float(interceptBaseCoordinate[1]),
                                     "fired_time": str(startDate),
+                                    "firedfrom_lat": float(interceptBaseCoordinate[1]),
+                                    "firedfrom_lon": float(interceptBaseCoordinate[0]),
                                     "aim_lat": float(missileCoordinate[1]),
                                     "aim_lon": float(missileCoordinate[0]),
                                     "expected_hit_time": str(endDate),
@@ -810,8 +1096,8 @@ def getRegion(target=teamname):
             # Drop and recreate military_region and points_of_interest tables.
             sql = \
                 f"""
-                    DROP TABLE assigned_regions;
-                    DROP TABLE points_of_interest;
+                    DROP TABLE IF EXISTS assigned_regions;
+                    DROP TABLE IF EXISTS points_of_interest;
                     CREATE TABLE assigned_regions (index_assigned_id SERIAL PRIMARY KEY, gid INT, cid INT, boundary GEOMETRY);
                     CREATE TABLE points_of_interest (points_index_id SERIAL PRIMARY KEY, point_id INT, point_category TEXT, point_geometry GEOMETRY (PointZ, 4326));
 
@@ -835,21 +1121,6 @@ def getRegion(target=teamname):
                     INSERT INTO assigned_regions (gid, cid, boundary) VALUES ({str(gid)}, {str(cid)}, (SELECT ST_GeomFromGeoJSON('
                         {rawRegionString}
                         '))); 
-
-                    INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-1, 'Battery',
-                            ST_SetSRID(ST_MakePoint(ST_X(ST_Centroid((SELECT boundary from assigned_regions LIMIT 1))), ST_Y(ST_Centroid((SELECT boundary from assigned_regions LIMIT 1))), 0), 4326));
-
-                    WITH "temp_point" AS (SELECT ST_GeometryN(ST_GeneratePoints((SELECT boundary FROM assigned_regions LIMIT 1), 1), 1))
-                    INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-2, 'Battery',
-                            ST_SetSRID(ST_MakePoint(ST_X((SELECT * FROM temp_point)), ST_Y((SELECT * FROM temp_point)), 0), 4326));
-
-                    WITH "temp_point" AS (SELECT ST_GeometryN(ST_GeneratePoints((SELECT boundary FROM assigned_regions LIMIT 1), 1), 1))
-                    INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-3, 'Battery',
-                            ST_SetSRID(ST_MakePoint(ST_X((SELECT * FROM temp_point)), ST_Y((SELECT * FROM temp_point)), 0), 4326));
-
-                    WITH "temp_point" AS (SELECT ST_GeometryN(ST_GeneratePoints((SELECT boundary FROM assigned_regions LIMIT 1), 1), 1))
-                    INSERT INTO points_of_interest (point_id, point_category, point_geometry) VALUES (-4, 'Battery',
-                            ST_SetSRID(ST_MakePoint(ST_X((SELECT * FROM temp_point)), ST_Y((SELECT * FROM temp_point)), 0), 4326));
                 """
 
 
@@ -878,7 +1149,7 @@ def getRegion(target=teamname):
             # Drop and recreate missile inventory table
             sql = \
                 f"""
-                DROP TABLE missile_inventory;
+                DROP TABLE IF EXISTS missile_inventory;
                 CREATE TABLE missile_inventory(missile_inventory_index SERIAL PRIMARY KEY, missile_name TEXT, missile_count INT); 
                 """
             # Insert each missile type and count.
@@ -892,7 +1163,11 @@ def getRegion(target=teamname):
             # Execute final constructed statement to add to database.
             cur.execute(sql)
 
-            return "Assigned region loaded."
+        # Place missile batteries
+        createFiveBatteries()
+
+
+        return "Assigned region loaded."
     except:
         if(simulationDebugLevel > 0):
             print("Get region function failure.")
@@ -930,14 +1205,14 @@ async def initializeSimulation():
             # Drop and recreate existing tables
             sql = \
                 f"""
-                    DROP TABLE active_missile_pings;
+                    DROP TABLE IF EXISTS active_missile_pings;
                     CREATE TABLE active_missile_pings (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
 
                     CREATE INDEX active_index
                     ON active_missile_pings 
                     USING gist(intersects);
 
-                    DROP TABLE solved_missile_pings;
+                    DROP TABLE IF EXISTS solved_missile_pings;
                     CREATE TABLE solved_missile_pings (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
                     
                     CREATE INDEX solved_index
@@ -1117,7 +1392,7 @@ async def createTables():
             # be dropped by the route to destroy attacker addresses if this isn't desired.
             sql = \
                 f"""
-                    CREATE TABLE attacker_addresses(attacker_index SERIAL PRIMARY KEY, attack_address TEXT);
+                    CREATE TABLE IF NOT EXISTS attacker_addresses(attacker_index SERIAL PRIMARY KEY, attack_address TEXT);
                     INSERT INTO attacker_addresses (attack_address) VALUES ('missilecommand.live:8080'); 
                 """
             cur.execute(sql)
@@ -1125,21 +1400,21 @@ async def createTables():
             # Create defender addresses table
             sql = \
                 f"""
-                    CREATE TABLE defender_addresses(defender_index SERIAL PRIMARY KEY, defense_address TEXT);
+                    CREATE TABLE IF NOT EXISTS defender_addresses(defender_index SERIAL PRIMARY KEY, defense_address TEXT);
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Create athena address table
             sql = \
                 f"""
-                    CREATE TABLE athena_address(athena_index SERIAL PRIMARY KEY, current_athena_address TEXT);
+                    CREATE TABLE IF NOT EXISTS athena_address(athena_index SERIAL PRIMARY KEY, current_athena_address TEXT);
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Create trajectory prediction scratch table
             sql =\
                 f"""
-                    CREATE TABLE trajectory_prediction (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
+                    CREATE TABLE IF NOT EXISTS trajectory_prediction (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
 
                     CREATE INDEX trajectory_index
                     ON trajectory_prediction 
@@ -1150,7 +1425,7 @@ async def createTables():
             # Create assigned regions table
             sql =\
                 f"""
-                    CREATE TABLE assigned_regions (index_assigned_id SERIAL PRIMARY KEY, gid INT, cid INT, boundary GEOMETRY);
+                    CREATE TABLE IF NOT EXISTS assigned_regions (index_assigned_id SERIAL PRIMARY KEY, gid INT, cid INT, boundary GEOMETRY);
 
                     CREATE INDEX assigned_regions_index
                     ON assigned_regions 
@@ -1161,7 +1436,7 @@ async def createTables():
             # Create points of interest table
             sql =\
                 f"""
-                    CREATE TABLE points_of_interest (points_index_id SERIAL PRIMARY KEY, point_id INT, point_category TEXT, point_geometry GEOMETRY (PointZ, 4326));
+                    CREATE TABLE IF NOT EXISTS points_of_interest (points_index_id SERIAL PRIMARY KEY, point_id INT, point_category TEXT, point_geometry GEOMETRY (PointZ, 4326));
 
                     CREATE INDEX points_index
                     ON points_of_interest 
@@ -1173,7 +1448,7 @@ async def createTables():
             # Note, this is probably too hardcoded, but there's not a system to share specs between attackers and defenders.
             sql =\
                 f"""
-                    CREATE TABLE missile_spec_key (
+                    CREATE TABLE IF NOT EXISTS missile_spec_key (
                         classification_id SERIAL PRIMARY KEY, 
                         classification_label text,
                         speed_category integer,
@@ -1197,14 +1472,14 @@ async def createTables():
             # Create missile inventory table
             sql =\
                 f"""
-                    CREATE TABLE missile_inventory(missile_inventory_index SERIAL PRIMARY KEY, missile_name TEXT, missile_count INT); 
+                    CREATE TABLE IF NOT EXISTS missile_inventory(missile_inventory_index SERIAL PRIMARY KEY, missile_name TEXT, missile_count INT); 
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Create active missile pings table
             sql =\
                 f"""
-                    CREATE TABLE active_missile_pings (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
+                    CREATE TABLE IF NOT EXISTS active_missile_pings (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
 
                     CREATE INDEX active_index
                     ON active_missile_pings 
@@ -1215,7 +1490,7 @@ async def createTables():
             # Create solved missile pings table
             sql =\
                 f"""
-                    CREATE TABLE solved_missile_pings (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
+                    CREATE TABLE IF NOT EXISTS solved_missile_pings (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
 
                     CREATE INDEX solved_index
                     ON solved_missile_pings 
@@ -1226,7 +1501,7 @@ async def createTables():
             # Create solved missile pings table
             sql =\
                 f"""
-                    CREATE TABLE logged_intercepts (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
+                    CREATE TABLE IF NOT EXISTS logged_intercepts (id SERIAL PRIMARY KEY, intersects geometry, time_code INT, missile_type TEXT, missile_id INT); 
 
                     CREATE INDEX logged_index
                     ON logged_intercepts 
@@ -1263,76 +1538,76 @@ async def destroyTables():
             # Destroy attacker addresses table
             sql = \
                 f"""
-                    DROP TABLE attacker_addresses;
+                    DROP TABLE IF EXISTS attacker_addresses;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy defender addresses table
             sql = \
                 f"""
-                    DROP TABLE defender_addresses;
+                    DROP TABLE IF EXISTS defender_addresses;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy athena address table
             sql = \
                 f"""
-                    DROP TABLE athena_address;
+                    DROP TABLE IF EXISTS athena_address;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy trajectory prediction scratch table
             sql =\
                 f"""
-                    DROP TABLE trajectory_prediction;
+                    DROP TABLE IF EXISTS trajectory_prediction;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy assigned regions table
             sql =\
                 f"""
-                    DROP TABLE assigned_regions;
+                    DROP TABLE IF EXISTS assigned_regions;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy points of interest table
             sql =\
                 f"""
-                    DROP TABLE points_of_interest;
+                    DROP TABLE IF EXISTS points_of_interest;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy missile specifications table
             sql =\
                 f"""
-                    DROP TABLE public.missile_spec_key;
+                    DROP TABLE IF EXISTS public.missile_spec_key;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy missile inventory table
             sql =\
                 f"""
-                    DROP TABLE missile_inventory; 
+                    DROP TABLE IF EXISTS missile_inventory; 
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy active missile pings table
             sql =\
                 f"""
-                    DROP TABLE active_missile_pings;
+                    DROP TABLE IF EXISTS active_missile_pings;
                 """
             cur.execute(sql)
         with DatabaseCursor(confPath) as cur:
             # Destroy solved missile pings table
             sql =\
                 f"""
-                    DROP TABLE solved_missile_pings;
+                    DROP TABLE IF EXISTS solved_missile_pings;
                 """
             cur.execute(sql)        
         with DatabaseCursor(confPath) as cur:
             sql = \
                 f"""
-                    DROP TABLE logged_intercepts;
+                    DROP TABLE IF EXISTS logged_intercepts;
                 """
             cur.execute(sql)
 
@@ -1462,5 +1737,4 @@ if __name__ == "__main__":
         initialConfig["publicport"] = "8081"
     
 
-    uvicorn.run(initialConfig["sitename"], host=initialConfig["host"], port=initialConfig["publicport"], log_level="debug", reload=True)
-
+    uvicorn.run(str(initialConfig["sitename"]), host=str(initialConfig["host"]), port=int(initialConfig["publicport"]), log_level="debug", reload=True)
